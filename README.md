@@ -13,19 +13,23 @@ or change ~/.bashrc file
 
 ## Run and build
 * Create four terminal windows
-* In the first window: run roscore
+* In the first window: run 
+```
+roscore
+```
 * Second:
-'''
+```
 rosrun CMSC828T pr2_indiv.launch
-''' 
+```
 * Third: 
 cd ~/catkin_ws/src/CMSC828T/src (This is needed to read the image from the correct path)
-'''
+```
 rosrun CMSC828T talker
-'''
+```
 * Forth: 
+```
 rosrun CMSC828T listener
-'''
+```
 
 ## Pipeline
 
