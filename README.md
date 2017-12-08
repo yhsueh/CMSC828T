@@ -1,5 +1,18 @@
 # Vision based Quad control AR-drone
 
+## Install package (catkin)
+1. create catkin workspace:
+	mkdir -p ~/catkin_ws/src
+	cd ~/catkin_ws
+	catkin_make
+	echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
+2. install CMSC828T:
+	cd ~/catkin_ws/src
+	git clone https://github.com/yhsueh/CMSC828T.git
+	cd ..
+	rosdep install CMSC828T
+	catkin_make	
+
 ## Requirement
 -ROS indigo Ubuntu 14.04.5 LTS
 -catkin
