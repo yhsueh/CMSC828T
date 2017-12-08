@@ -4,13 +4,6 @@
 -ROS indigo Ubuntu 14.04.5 LTS
 -catkin
 
-## Setup
-* clone from github
-* Type source ~/catkin_ws/devel/setup.bash in every terminal.
-or change ~/.bashrc file
-* cd ~/catkin_ws
-* catkin_make
-
 ## Run and build
 * Create four terminal windows
 * In the first window: run roscore
@@ -19,7 +12,6 @@ or change ~/.bashrc file
 rosrun CMSC828T pr2_indiv.launch
 ''' 
 * Third: 
-cd ~/catkin_ws/src/CMSC828T/src (This is needed to read the image from the correct path)
 '''
 rosrun CMSC828T talker
 '''

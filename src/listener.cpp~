@@ -1,11 +1,12 @@
 #include "ros/ros.h"
-#include "ar_track_alvar_msgs/AlvarMarkers.h"
+#include "ar_track_alvar/AlvarMarkers.h"
+#include "ar_trac_alvar/AlvarMarker.h"
 #include "std_msgs/String.h"
 
 /**
  * This tutorial demonstrates simple receipt of messages over the ROS system.
  */
-void chatterCallback(const ar_track_alvar_msgs::AlvarMarkers& msg)
+void chatterCallback(const ar_track_alvar::AlvarMarkers& msg)
 {
   int length = -1;
   length = msg.markers.size();
