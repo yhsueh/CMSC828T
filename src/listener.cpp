@@ -5,11 +5,25 @@
 /**
  * This tutorial demonstrates simple receipt of messages over the ROS system.
  */
+
+int marklength;
+float avgY, avgZ;
+
 void chatterCallback(const ar_track_alvar_msgs::AlvarMarkers& msg)
 {
-  int length = -1;
-  length = msg.markers.size();
-  ROS_INFO("%d sign detected!", length);
+  //int length = -1;
+  avgY = 0;
+  avgZ = 0;
+  marklength = msg.markers.size();
+  if (marklength == 4) {
+    for (int i = 0; i < 4; i ++) {
+      avgY += msg.markers[i].pose.pose.position.y;
+      avgZ += msg.markers[i].pose.pose.position.z;
+    }
+    avgY = avgY/4;
+    avgZ = avgZ/4;
+  }
+  ROS_INFO("%d sign detected! \n CenterY:%f\nCenterZ:%f\n", marklength, avgY, avgZ);
 }
 
 int main(int argc, char **argv)

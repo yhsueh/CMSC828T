@@ -3,7 +3,7 @@
 	<arg name="max_new_marker_error" default="0.08" />
 	<arg name="max_track_error" default="0.2" />
 
-	<arg name="cam_image_topic" default="/ardrone/front/image_raw" />
+	<arg name="cam_image_topic" default="/chatter" />
 	<arg name="cam_info_topic" default="" />
 	<arg name="output_frame" default="" />
 

@@ -1,5 +1,6 @@
 #include "ros/ros.h"
 #include "ar_track_alvar_msgs/AlvarMarkers.h"
+#include "std_msgs/Bool.h"
 #include "sensor_msgs/Image.h"
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
@@ -52,19 +53,24 @@ int main(int argc, char **argv)
    */
   image_transport::ImageTransport it(n);
   image_transport::Publisher pub = it.advertise("chatter",1);
+  ros::Publisher enablePub = n.advertise<std_msgs::Bool>("/ar_track_alvar/enable_detection",1);
 
-  ros::Rate loop_rate(1);
+  std_msgs::Bool boolFlag;
+  boolFlag.data = true;
+  enablePub.publish(boolFlag);
+  ROS_INFO("Enalbeflag published");
+
   cv::Mat Image;
   Image = cv::imread("../Marker.png",CV_LOAD_IMAGE_COLOR);
   cv::waitKey(1);
   sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", Image).toImageMsg();
 
-/*
+
   cv::namedWindow("view");
   cv::startWindowThread();
  	
   cv::imshow("view",Image);
-*/
+  ros::Rate loop_rate(1);
   while (ros::ok())
   {
     /**
@@ -80,13 +86,13 @@ int main(int argc, char **argv)
      * in the constructor above.
      */
  
-
+    ROS_INFO("PUBLISHING");
     ros::spinOnce();
     pub.publish(msg);
     loop_rate.sleep();
   }
 
- // cv::destroyWindow("view");
+  cv::destroyWindow("view");
 
   return 0;
 }

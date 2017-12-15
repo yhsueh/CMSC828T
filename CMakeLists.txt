@@ -12,6 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   sensor_msgs
+  geometry_msgs
+  ardrone_autonomy
   ar_track_alvar_msgs
   message_generation
   cv_bridge
@@ -208,6 +210,6 @@ add_executable(listener src/listener.cpp)
 target_link_libraries(listener ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(listener ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(talker src/talker.cpp)
-target_link_libraries(talker ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
-add_dependencies(talker ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_executable(base src/base.cpp src/Command.cpp)
+target_link_libraries(base ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
+add_dependencies(base ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
