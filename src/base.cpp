@@ -2,31 +2,64 @@
 #include "std_msgs/Empty.h"
 #include "ardrone_autonomy/Navdata.h"
 #include "ar_track_alvar_msgs/AlvarMarkers.h"
-//#8nclude "ar_track_alvar_msgs/AlvarMarker.h"
+//#include "ros/ros.h"
+#include "tf/transform_datatypes.h"
+//#include "ar_track_alvar_msgs/AlvarMarkers.h"
+//#include "std_msgs/String.h"
 #include "geometry_msgs/Twist.h"
 #include "Command.hpp"
-
 #include <sstream>
 #include <string>
 int marklength;
-float avgY, avgZ;
+double avgX, avgY, avgZ, roll, pitch, yaw, sumRoll, sumPitch, sumYaw;
+int markSIZE = 1;
 
+double convertDegree(double rad) {
+  double degree = rad*180.0/M_PI;
+  if (degree < 0)
+    degree += 360;
+  return degree;
+}
+//yall increases +rotz to 90 degree
 void markerCallback(const ar_track_alvar_msgs::AlvarMarkers& msg)
 {
+  //int length = -1;
+  avgX = 0;
   avgY = 0;
   avgZ = 0;
+  sumRoll = 0;
+  sumPitch = 0;
+  sumYaw = 0;
+  roll = 0;
+  pitch = 0;
+  yaw = 0;
+
   marklength = msg.markers.size();
-  if (marklength == 4) {
-    for (int i = 0; i < 4; i ++) {
+  if (marklength == markSIZE) {
+    for (int i = 0; i < marklength; i ++) {
+      avgX += msg.markers[i].pose.pose.position.x;
       avgY += msg.markers[i].pose.pose.position.y;
       avgZ += msg.markers[i].pose.pose.position.z;
+      tf::Quaternion q(msg.markers[i].pose.pose.orientation.x,
+        msg.markers[i].pose.pose.orientation.y,
+        msg.markers[i].pose.pose.orientation.z,
+        msg.markers[i].pose.pose.orientation.w);
+      tf::Matrix3x3 m(q);
+      m.getRPY(roll, pitch, yaw);
+      roll = convertDegree(roll);
+      pitch = convertDegree(pitch);
+      yaw = convertDegree(yaw);
+      sumRoll += roll;
+      sumPitch += pitch;
+      sumYaw += yaw;
     }
+    avgX = avgX/4;
     avgY = avgY/4;
     avgZ = avgZ/4;
   }
-  ROS_INFO("%d sign detected! \n CenterY:%f\nCenterZ:%f\n", marklength, avgY, avgZ);
+  ROS_INFO("%d sign detected!\nCenterX:%f\nCenterY:%f\nCenterZ:%f\n", marklength, avgX, avgY, avgZ);
+  ROS_INFO("ROll:%f\nPITCH:%f\nYALL:%f\n",sumRoll,sumPitch,sumYaw);
 }
-
 
 geometry_msgs::Twist generateTwist(std::string axis, float value) {
   geometry_msgs::Twist msg;
@@ -126,7 +159,7 @@ int main(int argc, char **argv)
       ros::spinOnce();
       loop_rate.sleep();
     }
-  while (ros::ok() && marklength < 4 && vertCount < 4)
+  while (ros::ok() && marklength < markSIZE && vertCount < 4)
   {
     //Turning around;
     ROS_INFO("diff value is %6.4f", diff);
@@ -137,7 +170,7 @@ int main(int argc, char **argv)
       velPub.publish(generateTwist("az",0.5));
       ros::spinOnce();
       // All tags found
-      if (marklength >= 4) {
+      if (marklength >= markSIZE) {
         break;
       }
       loop_rate.sleep();
@@ -147,7 +180,7 @@ int main(int argc, char **argv)
     ros::Duration(0.5).sleep();
 
     // Vertical shift
-    if (marklength < 4) {
+    if (marklength < markSIZE) {
 	    count = 0;
 	    while (count < 10) {
 	  	  velPub.publish(generateTwist("lz",0.1));
@@ -158,6 +191,9 @@ int main(int argc, char **argv)
     }
     ros::Duration(0.5).sleep();
   }
+
+
+
 
   if (marklength == 4)
     ROS_INFO("Four tags found");

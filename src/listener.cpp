@@ -1,4 +1,5 @@
 #include "ros/ros.h"
+#include "tf/transform_datatypes.h"
 #include "ar_track_alvar_msgs/AlvarMarkers.h"
 #include "std_msgs/String.h"
 
@@ -7,23 +8,55 @@
  */
 
 int marklength;
-float avgY, avgZ;
+double avgX, avgY, avgZ, roll, pitch, yaw, sumRoll, sumPitch, sumYaw;
 
+double convertDegree(double rad) {
+  double degree = rad*180.0/M_PI;
+  if (degree < 0)
+    degree += 360;
+  return degree;
+}
+
+
+
+//yall increases +rotz to 90 degree
 void chatterCallback(const ar_track_alvar_msgs::AlvarMarkers& msg)
 {
   //int length = -1;
+  avgX = 0;
   avgY = 0;
   avgZ = 0;
+  sumRoll = 0;
+  sumPitch = 0;
+  sumYaw = 0;
+  roll = 0;
+  pitch = 0;
+  yaw = 0;
   marklength = msg.markers.size();
-  if (marklength == 4) {
-    for (int i = 0; i < 4; i ++) {
+  if (marklength == 1) {
+    for (int i = 0; i < marklength; i ++) {
+      avgX += msg.markers[i].pose.pose.position.x;
       avgY += msg.markers[i].pose.pose.position.y;
       avgZ += msg.markers[i].pose.pose.position.z;
+      tf::Quaternion q(msg.markers[i].pose.pose.orientation.x,
+        msg.markers[i].pose.pose.orientation.y,
+        msg.markers[i].pose.pose.orientation.z,
+        msg.markers[i].pose.pose.orientation.w);
+      tf::Matrix3x3 m(q);
+      m.getRPY(roll, pitch, yaw);
+      roll = convertDegree(roll);
+      pitch = convertDegree(pitch);
+      yaw = convertDegree(yaw);
+      sumRoll += roll;
+      sumPitch += pitch;
+      sumYaw += yaw;
     }
+    avgX = avgX/4;
     avgY = avgY/4;
     avgZ = avgZ/4;
   }
-  ROS_INFO("%d sign detected! \n CenterY:%f\nCenterZ:%f\n", marklength, avgY, avgZ);
+  ROS_INFO("%d sign detected!\nCenterX:%f\nCenterY:%f\nCenterZ:%f\n", marklength, avgX, avgY, avgZ);
+  ROS_INFO("ROll:%f\nPITCH:%f\nYALL:%f\n",sumRoll,sumPitch,sumYaw);
 }
 
 int main(int argc, char **argv)
