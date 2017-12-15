@@ -192,11 +192,11 @@ int main(int argc, char **argv)
     ros::Duration(0.5).sleep();
   }
 
-
-
+// Orientated to tag 
 
   if (marklength == 4)
     ROS_INFO("Four tags found");
-  landPub.publish(eMsg);
+ // landPub.publish(eMsg);
+ if (avgY<0)
   return 0;
 }
