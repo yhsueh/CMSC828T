@@ -246,8 +246,7 @@ int main(int argc, char **argv)
     }
     else{
       ROS_INFO("Nothing found.");
-      //velPub.publish(generateTwist("Empty",0,0,0));
-      
+      ros::Duration(1).sleep();      
       //Begin Searching
       if (angVec.empty()) {
         ROS_INFO("ERROR OCCURED, SHUTDOWN");
