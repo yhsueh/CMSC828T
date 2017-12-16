@@ -33,7 +33,7 @@ void chatterCallback(const ar_track_alvar_msgs::AlvarMarkers& msg)
   pitch = 0;
   yaw = 0;
   marklength = msg.markers.size();
-  if (marklength == 1) {
+  if (marklength == 2) {
     for (int i = 0; i < marklength; i ++) {
       avgX += msg.markers[i].pose.pose.position.x;
       avgY += msg.markers[i].pose.pose.position.y;
@@ -47,6 +47,7 @@ void chatterCallback(const ar_track_alvar_msgs::AlvarMarkers& msg)
       roll = convertDegree(roll);
       pitch = convertDegree(pitch);
       yaw = convertDegree(yaw);
+      ROS_INFO("ROll:%f,Pitch:%f,Yaw:%f",roll,pitch,yaw);
       sumRoll += roll;
       sumPitch += pitch;
       sumYaw += yaw;
@@ -55,8 +56,8 @@ void chatterCallback(const ar_track_alvar_msgs::AlvarMarkers& msg)
     avgY = avgY/4;
     avgZ = avgZ/4;
   }
-  ROS_INFO("%d sign detected!\nCenterX:%f\nCenterY:%f\nCenterZ:%f\n", marklength, avgX, avgY, avgZ);
-  ROS_INFO("ROll:%f\nPITCH:%f\nYALL:%f\n",sumRoll,sumPitch,sumYaw);
+  //ROS_INFO("%d sign detected!\nCenterX:%f\nCenterY:%f\nCenterZ:%f\n", marklength, avgX, avgY, avgZ);
+  //ROS_INFO("ROll:%f\nPITCH:%f\nYALL:%f\n",sumRoll,sumPitch,sumYaw);
 }
 
 int main(int argc, char **argv)

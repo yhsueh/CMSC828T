@@ -211,6 +211,6 @@ add_executable(listener src/listener.cpp)
 target_link_libraries(listener ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(listener ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(base src/base.cpp src/Command.cpp)
+add_executable(base src/base.cpp src/Command.cpp src/PIDcontroller.cpp)
 target_link_libraries(base ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(base ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
