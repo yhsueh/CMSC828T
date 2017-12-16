@@ -12,6 +12,7 @@
 #include <sstream>
 #include <string>
 #include <cmath>
+#include <vector>
 
 //rostopic pub /ardrone/reset std_msgs/Empty
 int marklength;
@@ -136,11 +137,9 @@ int main(int argc, char **argv)
 
 
   // Takeoff
-
   ros::Duration(0.5).sleep();
   std_msgs::Empty eMsg;
   takeOffPub.publish(eMsg);
-
 
   int count = 0;
   bool vertFlag = false;
@@ -195,7 +194,7 @@ int main(int argc, char **argv)
 
   // Aligning Y left Z tommand
   PIDcontroller linCtr;
-  linCtr.setP(0.4);
+  linCtr.setP(0.05);
   linCtr.setD(0.05);
   linCtr.setI(0);
   linCtr.setT(1);
@@ -206,15 +205,48 @@ int main(int argc, char **argv)
   angCtr.setI(0);
   angCtr.setT(1);
 
-  int Count = 0;
+  int Count = 0; //For rotating when losing target
+  bool searchFlag = false;
+  std::vector<double>angVec;
+  double angVecSum;
 
-  while(ros::ok()) {
-    
-    
+  while(ros::ok()) {    
+    // Rotate back if target is lost.
+    if (searchFlag) {
 
+      if (angVec.empty()) {
+        break;
+      }
 
+      for (int i = 0; i < 20; i++) {
+        angVecSum += angVec.back();
+        angVec.pop_back();
+      }
+      angVecSum = angVecSum/20;
+      if (angVecSum > 0) {
+        Count = 0;
+        while (Count < 40){
+          ROS_INFO("ROTATE +az");
+          velPub.publish(generateTwist("az",0.1,0,0));
+          loop_rate.sleep();
+          Count ++;
+        }
+      }
+      else {
+        Count = 0;
+        while (Count < 40){
+          ROS_INFO("Rotate -az");
+          velPub.publish(generateTwist("az",-0.1,0,0));
+          loop_rate.sleep();
+          Count ++;
+        }
+      }
+      angVec.clear();
+      angVecSum = 0;
+      searchFlag = false;
+    }
 
-    //Translation    
+    //Translation  CHANGE HERE WHEN USING 4  
     if (marklength > 0) {
       ROS_INFO("Detected");
       double velY = linCtr.calculatePID(avgY);
@@ -243,6 +275,8 @@ int main(int argc, char **argv)
       }
 
       ROS_INFO("\nAVGY:%f\nAVGZ:%f\nYaw:%f\n\nY:%f\nZ:%f\nAngZ:%f",avgY,avgZ,(sumYaw-90),velY,velZ,angZ);
+      // Storing value;
+      angVec.push_back(sumYaw-90);
 
       //velPub.publish(generateTwist("lylz",velY,velZ,0));
       velPub.publish(generateTwist("lylzaz",velY,velZ,angZ));
@@ -250,13 +284,11 @@ int main(int argc, char **argv)
     else{
       ROS_INFO("Nothing found.");
       velPub.publish(generateTwist("Empty",0,0,0));
+      //Begin Searching
+      searchFlag = true;
     }
-
-    //vel
-    //sumYaw
     ros::spinOnce();
     loop_rate.sleep();
-    Count ++;
   }
 
   //if (marklength == 4)
