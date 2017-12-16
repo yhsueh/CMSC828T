@@ -11,6 +11,7 @@
 #include "PIDcontroller.hpp"
 #include <sstream>
 #include <string>
+#include <cmath>
 
 //rostopic pub /ardrone/reset std_msgs/Empty
 int marklength;
@@ -66,7 +67,7 @@ void markerCallback(const ar_track_alvar_msgs::AlvarMarkers& msg)
     sumPitch = sumPitch/markSIZE;
     sumYaw = sumYaw/markSIZE;
   }
-  ROS_INFO("%d sign detected!\nCenterX:%f\nCenterY:%f\nCenterZ:%f\n", marklength, avgX, avgY, avgZ);
+  //ROS_INFO("%d sign detected!\nCenterX:%f\nCenterY:%f\nCenterZ:%f\n", marklength, avgX, avgY, avgZ);
   //ROS_INFO("ROll:%f\nPITCH:%f\nYALL:%f\n",sumRoll,sumPitch,sumYaw);
 }
 
@@ -131,13 +132,16 @@ int main(int argc, char **argv)
   ros::Subscriber stateSub = n.subscribe("/ardrone/navdata",100, &Command::stateCallback,&cmd);
   double linMax = 0.46;
   double angMax = 0.6;
+  ros::Rate loop_rate(20);
+
 
   // Takeoff
+/*
   ros::Duration(0.5).sleep();
   std_msgs::Empty eMsg;
   takeOffPub.publish(eMsg);
 
-  ros::Rate loop_rate(20);
+
   int count = 0;
   bool vertFlag = false;
   bool turnFlag = true;
@@ -150,7 +154,7 @@ int main(int argc, char **argv)
       ros::spinOnce();
       loop_rate.sleep();
     }
-
+*/
   ros::Duration(1).sleep();
 
   // Search for Tags 
@@ -191,16 +195,16 @@ int main(int argc, char **argv)
 
   // Aligning Y left Z tommand
   PIDcontroller linCtr;
-  linCtr.setP(3);
-  linCtr.setD(1.5);
+  linCtr.setP(0.5);
+  linCtr.setD(0);
   linCtr.setI(0);
-  linCtr.setT(0.1);
+  linCtr.setT(1);
  
   PIDcontroller angCtr;
-  angCtr.setP(1);
+  angCtr.setP(0.01);
   angCtr.setD(0);
   angCtr.setI(0);
-  angCtr.setT(0.1);
+  angCtr.setT(1);
 
   int Count = 0;
 
@@ -211,25 +215,37 @@ int main(int argc, char **argv)
       ROS_INFO("Detected");
       double velY = linCtr.calculatePID(avgY);
       double velZ = linCtr.calculatePID(avgZ);
-      if (velY > linMax) {
-        velY = linMax;
+      
+      if (abs(velY) > linMax) {
+        if (velY > 0)
+          velY = linMax;
+        else
+          velY = -linMax;
       }
-      if (velZ > linMax) {
-        velZ = linMax;
+      if (abs(velZ) > linMax) {
+        if (velZ > 0)
+          velZ = linMax;
+        else
+          velZ = -linMax;
       }
 
       double angZ = angCtr.calculatePID(sumYaw-90);
-      if (angZ > angMax) {
-        angZ = angMax;
+      if (abs(angZ) > angMax) {
+        if (angZ > 0){
+          angZ = angMax;
+        }
+        else
+          angZ = -angMax;
       }
 
-      ROS_INFO("AVGY:%f\nAVGZ:%f\nSUMYAW:%f\nY:%f\nZ:%f\nAngZ:%f\n",avgY,avgZ,sumYaw,velY,velZ,angZ);
-      velPub.publish(generateTwist("lylz",velY,velZ,0));
+      ROS_INFO("\nAVGY:%f\nAVGZ:%f\nYaw:%f\n\nY:%f\nZ:%f\nAngZ:%f",avgY,avgZ,(sumYaw-90),velY,velZ,angZ);
+
+      //velPub.publish(generateTwist("lylz",velY,velZ,0));
       //velPub.publish(generateTwist("lylzaz",velY,velZ,angZ));
     }
     else{
-      ROS_INFO("Nothing found");
-      velPub.publish(generateTwist("Empty",0,0,0));
+      ROS_INFO("Nothing found.");
+      //velPub.publish(generateTwist("Empty",0,0,0));
     }
 
     //vel
