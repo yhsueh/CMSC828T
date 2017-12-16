@@ -136,7 +136,7 @@ int main(int argc, char **argv)
 
 
   // Takeoff
-/*
+
   ros::Duration(0.5).sleep();
   std_msgs::Empty eMsg;
   takeOffPub.publish(eMsg);
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
       ros::spinOnce();
       loop_rate.sleep();
     }
-*/
+
   ros::Duration(1).sleep();
 
   // Search for Tags 
@@ -195,14 +195,14 @@ int main(int argc, char **argv)
 
   // Aligning Y left Z tommand
   PIDcontroller linCtr;
-  linCtr.setP(0.5);
-  linCtr.setD(0);
+  linCtr.setP(0.4);
+  linCtr.setD(0.05);
   linCtr.setI(0);
   linCtr.setT(1);
  
   PIDcontroller angCtr;
-  angCtr.setP(0.01);
-  angCtr.setD(0);
+  angCtr.setP(0.001);
+  angCtr.setD(0.001);
   angCtr.setI(0);
   angCtr.setT(1);
 
@@ -210,6 +210,10 @@ int main(int argc, char **argv)
 
   while(ros::ok()) {
     
+    
+
+
+
     //Translation    
     if (marklength > 0) {
       ROS_INFO("Detected");
@@ -241,11 +245,11 @@ int main(int argc, char **argv)
       ROS_INFO("\nAVGY:%f\nAVGZ:%f\nYaw:%f\n\nY:%f\nZ:%f\nAngZ:%f",avgY,avgZ,(sumYaw-90),velY,velZ,angZ);
 
       //velPub.publish(generateTwist("lylz",velY,velZ,0));
-      //velPub.publish(generateTwist("lylzaz",velY,velZ,angZ));
+      velPub.publish(generateTwist("lylzaz",velY,velZ,angZ));
     }
     else{
       ROS_INFO("Nothing found.");
-      //velPub.publish(generateTwist("Empty",0,0,0));
+      velPub.publish(generateTwist("Empty",0,0,0));
     }
 
     //vel
